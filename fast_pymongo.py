@@ -5,11 +5,12 @@ from fastapi import FastAPI, Request, Response, status
 from pymongo import MongoClient
 import pymongo
 
+## Connect to MongoDB Compass
 client = pymongo.MongoClient() # MongoDB connection
 pets_db = client['mydb'] # Create 'pets_db' Database
 fish_col = pets_db['people'] # Create 'fish_col' Collection
 
-# Pydantic BaseModel
+## Pydantic BaseModel
 class Pet(BaseModel):
     id: int
     name: str
@@ -56,7 +57,7 @@ def read_pet(id:int,
 def read_all_pet(response:Response):
     try:
         print(f'method called: {str(id)}')
-        results = fish.collection.find({})
+        results = fish_col.collection.find({})
         result_list = []
         for result in results:
             result_list.append(str(result))
@@ -71,7 +72,14 @@ def read_all_pet(response:Response):
         response.status_code = status.HTTP_404_NOT_FOUND
         return 'Error Occured'
 
-# @app.put('/update', status_code = 200)
-# def update_put(pet:Pet):
-#     print(f'method called : {str(pet)}')
-#     result = fish_col.update_one({'id':pet.id},{'$set'})
+@app.put('/update', status_code = 200)
+def update_put(pet:Pet):
+    print(f'method called : {str(pet)}')
+    result = fish_col.update_one({'id' : pet.id},{'$set' : { 'price':pet.price}})
+    return 'update success'
+
+@app.delete('/remove/{id}', status_code = 200)
+def delete_pet(id:int):
+    print(f'remove pet called : {str(id)}')
+    result = fish_col.delete_one({'id':id})
+    return 'Delete Success'
